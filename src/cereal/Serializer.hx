@@ -1,5 +1,6 @@
 package cereal;
 
+import cs.system.DateTime;
 using StringHelp;
 
 class Serializer {
@@ -21,15 +22,44 @@ class Serializer {
         throw "stringToNode is abstract";
     }
 
+    // ..................................................................................
+
     /**
     * Converts an object into a Node
     **/
     public function objToNode(obj:Dynamic) : Node {
-        var root = new Node();
-        root.name = getTypeName(obj);
+        var node = new Node();
+        node.name = getTypeName(obj);
 
+        for (f in Reflect.fields(obj)) {
+            var fieldValue = Reflect.getProperty(obj, f);
+
+            // is a primitive
+            if (Std.is(fieldValue, Float)
+            ||  Std.is(fieldValue, String)
+            ||  Std.is(fieldValue, Bool)
+            ||  Std.is(fieldValue, Int)) {
+                node.attributes.set(f, fieldValue.toString());
+                continue;
+            }
+
+            // is array
+            if (Std.is(fieldValue, Array)) {
+                var collection = new Array<Node>();
+                for (i in fieldValue) {
+                    collection.push(objToNode(i));
+                }
+                node.collections.set(f, collection);
+                continue;
+            }
+
+            // is something else
+            node.collections.set(f, objToNode(fieldValue));
+        }
 
     }
+
+    // ..................................................................................
 
     /**
     * Converts a node structure into an object structure
@@ -84,6 +114,8 @@ class Serializer {
         }
     }
 
+    // ..................................................................................
+
     /**
     * Returns a new instance of a class given the class name. The class name
     * has to be mapped to a class object on the "classes" map, or, in its
@@ -100,6 +132,8 @@ class Serializer {
 
         return instance;
     }
+
+    // ..................................................................................
 
     private function getTypeName(obj:Dynamic) {
         var type = Type.getClassName(obj);
