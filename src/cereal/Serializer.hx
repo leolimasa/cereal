@@ -1,8 +1,15 @@
 package cereal;
 
-import cs.system.DateTime;
-using StringHelp;
+import cereal.exceptions.PropertyNotInitialized;
+import cereal.exceptions.ClassInstantiationFail;
+using cereal.StringHelp;
 
+
+/**
+* Abstract class that converts Strings to Objects and Objects to Strings. The format of
+* the string will be dependent on how the nodeToString() and stringToNode() methods are
+* overriden.
+**/
 class Serializer {
     public var types:Map<String,String>;
 
@@ -54,9 +61,9 @@ class Serializer {
             }
 
             // is something else
-            node.collections.set(f, objToNode(fieldValue));
+            node.collections.set(f, [objToNode(fieldValue)]);
         }
-
+        return node;
     }
 
     // ..................................................................................
@@ -72,28 +79,30 @@ class Serializer {
         // Sets attribute values for root
         for (attribute in node.attributes.keys()) {
             var attr:String = node.attributes[attribute];
-            var currentVal = Reflect.getProperty(root, attribute);
+            var fieldName = getFieldNameIgnoreCase(root, attribute);
+            var currentVal = Reflect.getProperty(root, fieldName);
 
             if (attr.isFloat()) {
-                Reflect.setProperty(root, attribute, Std.parseFloat(attr));
+                Reflect.setProperty(root, fieldName, Std.parseFloat(attr));
             } else if (attr.isInt()) {
-                Reflect.setProperty(root, attribute, Std.parseInt(attr));
+                Reflect.setProperty(root, fieldName, Std.parseInt(attr));
             } else if (Std.is(currentVal, Bool)) {
-                Reflect.setProperty(root, attribute, attr.toBool());
+                Reflect.setProperty(root, fieldName, attr.toBool());
             } else {
-                Reflect.setProperty(root, attribute, attr);
+                Reflect.setProperty(root, fieldName, attr);
             }
         }
 
         // Recurse into the collections
         for (collectionAttr in node.collections.keys()) {
-            var rootAttr = Reflect.getProperty(root, collectionAttr);
+            var fieldName = getFieldNameIgnoreCase(root, collectionAttr);
+            var rootAttr = Reflect.getProperty(root, fieldName);
 
             // If the attribute is not an array, we get the first child of
             // the collection and pass it as an instance
             if (!Std.is(rootAttr, Array)) {
                 var inst = nodeToObj(node.collections[collectionAttr][0]);
-                Reflect.setProperty(root, collectionAttr, inst);
+                Reflect.setProperty(root, fieldName, inst);
                 continue;
             }
 
@@ -110,8 +119,10 @@ class Serializer {
                 var inst = nodeToObj(child);
                 resultArr.push(inst);
             }
-            Reflect.setProperty(root, collectionAttr, resultArr);
+            Reflect.setProperty(root, fieldName, resultArr);
         }
+
+        return root;
     }
 
     // ..................................................................................
@@ -124,8 +135,15 @@ class Serializer {
 
     private function createInstance(name:String):Dynamic {
         var clazz = types[name.toLowerCase()];
-        var instance = Type.createInstance(Type.resolveClass(clazz), []);
 
+        // tries to resolve the class
+        var cls = Type.resolveClass(clazz);
+        if (cls == null) {
+            throw new ClassInstantiationFail(clazz);
+        }
+
+        // tries to create a new instance of the class
+        var instance = Type.createInstance(cls, []);
         if (instance == null) {
             throw new ClassInstantiationFail(clazz);
         }
@@ -145,4 +163,16 @@ class Serializer {
         return null;
     }
 
+    // ..................................................................................
+
+    private function getFieldNameIgnoreCase(obj:Dynamic, prop:String) : Dynamic {
+
+        for (f in Reflect.fields(obj)) {
+            if (f.toLowerCase() == prop.toLowerCase()) {
+                return f;
+            }
+        }
+
+        throw new PropertyNotInitialized(prop);
+    }
 }

@@ -1,8 +1,4 @@
-package engine;
-
-import engine.exceptions.ClassInstantiationFail;
-import engine.exceptions.ClassNotRegistered;
-using cereal.StringHelp;
+package cereal;
 
 /**
 * Abstract class responsible for converting a series of nodes into an object structure. For example:
