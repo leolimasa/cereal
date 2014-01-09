@@ -1,66 +1,52 @@
 package cereal;
 
 /**
-* Abstract class responsible for converting a series of nodes into an object structure. For example:
-
-Given the following node structure (pseudocode - not syntatically correct):
-
-root = new Node();
-root.name = "house";
-root.attributes = {"color": "red", "grass": "green", "size":"30"};
-root.collections = [{
-		"construction":
-			new Node("name": "window", "attributes": {"type":"glass"}),
-			new Node("name": "door", "attributes": {"type": "wood"})
-	}
-]
-
-Calling inflator.inflate(house, root) would be equivalent to this:
-
-house.color = "red";
-house.grass = "green";
-house.size = 30;
-
-var child1 = new Window();
-child1.type = "glass";
-
-var child2 = new Door();
-child2.type = "wood";
-
-house.construction = [child1, child2];
-
+*
+*
 **/
-class XMLSerializer {
-    public var classes:Map<String, String>;
-    public static var defaultClasses:Map<String, String>;
+class XMLSerializer extends Serializer {
 
-    /* ............................................................................... */
-
-    static function __init__() {
-        defaultClasses = new Map<String, String>();
+    public function nodeToString(node:Node) : String {
+        var root = Xml.createDocument();
+        return nodeToXml(node, root).toString();
     }
 
-    /* ............................................................................... */
-
-    public function new() {
-        classes = new Map<String, String>();
+    public function stringToNode(str:String) : Node {
+        return xmlToNode(Xml.parse(str));
     }
 
-    /* ............................................................................... */
+    private function xmlToNode(xml:Xml) : Node {
+        var n = new Node();
+        n.name = xml.nodeName;
 
+        for (a in xml.attributes) {
+            n.attributes.set(a, xml.get(a));
+        }
 
-
-    /* ............................................................................... */
-
-    /**
-    * Converts an object into a node
-    **/
-    public function serialize(root:Dynamic) {
-
+        for (el in xml.elements()) {
+            var subels = new Array<Node>();
+            for (subel in el.elements()) {
+                subels.push(xmlToNode(subel));
+            }
+            n.collections.set(el.nodeName, subels);
+        }
+        return n;
     }
 
-    /* ............................................................................... */
+    private function nodeToXml(node:Node, root:Xml) : Xml {
+        var el = root.createElement(node.name);
+        for (a in node.attributes.keys()) {
+            el.set(a, node.attributes.get(a));
+        }
 
-
+        for (c in node.collections.keys()) {
+            var xmlcol = root.createElement(c);
+            for (v in node.collections.get(c)) {
+                xmlcol.addChild(nodeToXml(v, root));
+            }
+            el.addChild(xmlcol);
+        }
+        return el;
+    }
 
 }
