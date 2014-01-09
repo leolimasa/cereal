@@ -25,7 +25,7 @@ class StringHelp {
     /* ............................................................................... */
 
     public static function toBool(value:String): Bool {
-        return value == "true";
+        return value.toLowerCase() == "true";
     }
 
 }

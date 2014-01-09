@@ -1,5 +1,7 @@
 package cereal;
 
+import cereal.exceptions.ClassNotRegistered;
+import String;
 import cereal.exceptions.PropertyNotInitialized;
 import cereal.exceptions.ClassInstantiationFail;
 using cereal.StringHelp;
@@ -39,29 +41,32 @@ class Serializer {
         node.name = getTypeName(obj);
 
         for (f in Reflect.fields(obj)) {
-            var fieldValue = Reflect.getProperty(obj, f);
+            var fieldValue:Dynamic = Reflect.getProperty(obj, f);
 
             // is a primitive
             if (Std.is(fieldValue, Float)
-            ||  Std.is(fieldValue, String)
-            ||  Std.is(fieldValue, Bool)
-            ||  Std.is(fieldValue, Int)) {
-                node.attributes.set(f, fieldValue.toString());
-                continue;
+            || Std.is(fieldValue, Int)
+            || Std.is(fieldValue, String)) {
+                node.attributes.set(f, Std.string(fieldValue));
+	        } else if (Std.is(fieldValue, Bool)) {
+                node.attributes.set(f, fieldValue ? "true" : "false");
             }
 
             // is array
-            if (Std.is(fieldValue, Array)) {
+            else if (Std.is(fieldValue, Array)) {
                 var collection = new Array<Node>();
-                for (i in fieldValue) {
+                var arr:Array<Dynamic> = fieldValue;
+                for (i in arr) {
                     collection.push(objToNode(i));
                 }
                 node.collections.set(f, collection);
-                continue;
             }
 
-            // is something else
-            node.collections.set(f, [objToNode(fieldValue)]);
+            // is something else, other than null
+            else if (fieldValue != null) {
+                node.collections.set(f, [objToNode(fieldValue)]);
+            }
+
         }
         return node;
     }
@@ -154,13 +159,14 @@ class Serializer {
     // ..................................................................................
 
     private function getTypeName(obj:Dynamic) {
-        var type = Type.getClassName(obj);
+        var type:String = Type.getClassName(Type.getClass(obj));
+
         for (k in types.keys()) {
-            if (types.get(k) == type.toLowerCase()) {
+            if (types.get(k).toLowerCase() == type.toLowerCase()) {
                 return k;
             }
         }
-        return null;
+        throw new ClassNotRegistered(type);
     }
 
     // ..................................................................................
