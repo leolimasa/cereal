@@ -183,7 +183,8 @@ class Serializer {
     // ..................................................................................
 
     private function getFieldNameIgnoreCase(obj:Dynamic, prop:String) : Dynamic {
-        for (f in Reflect.fields(obj)) {
+
+        for (f in Type.getInstanceFields(Type.getClass(obj))) {
             if (f.toLowerCase() == prop.toLowerCase()) {
                 return f;
             }

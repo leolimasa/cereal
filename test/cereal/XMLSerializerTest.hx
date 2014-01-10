@@ -6,8 +6,8 @@ import haxe.unit.TestCase;
 class Cls1 {
     public var children:Array<Cls1>;
     public var attr1:String;
-    public var attr2:Int = 0;
-    public var attr3:Cls1 = null;
+    public var attr2:Int;
+    public var attr3:Cls1;
 
     public function new() {
         children = new Array<Cls1>();
