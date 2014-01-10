@@ -15,6 +15,10 @@ using cereal.StringHelp;
 class Serializer {
     public var types:Map<String,String>;
 
+    private function new() {
+        types = new Map<String,String>();
+    }
+
     public function inflate(contents:String) : Dynamic {
         return nodeToObj(stringToNode(contents));
     }
@@ -139,7 +143,14 @@ class Serializer {
     **/
 
     private function createInstance(name:String):Dynamic {
-        var clazz = types[name.toLowerCase()];
+
+        var clazz;
+        try {
+            clazz = types[name.toLowerCase()];
+        } catch(e:Dynamic) {
+            throw new ClassNotRegistered(name.toLowerCase());
+        }
+
 
         // tries to resolve the class
         var cls = Type.resolveClass(clazz);
@@ -172,7 +183,6 @@ class Serializer {
     // ..................................................................................
 
     private function getFieldNameIgnoreCase(obj:Dynamic, prop:String) : Dynamic {
-
         for (f in Reflect.fields(obj)) {
             if (f.toLowerCase() == prop.toLowerCase()) {
                 return f;

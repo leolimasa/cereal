@@ -11,6 +11,7 @@ class RegularObj {
 
 class MockSerializer extends Serializer {
     public function new() {
+        super();
         types = new Map<String, String>();
     }
 }

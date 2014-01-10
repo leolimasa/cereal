@@ -6,20 +6,23 @@ package cereal;
 **/
 class XMLSerializer extends Serializer {
 
-    public function nodeToString(node:Node) : String {
-        var root = Xml.createDocument();
-        return nodeToXml(node, root).toString();
+    public function new() {
+        super();
     }
 
-    public function stringToNode(str:String) : Node {
-        return xmlToNode(Xml.parse(str));
+    public override function nodeToString(node:Node) : String {
+        return nodeToXml(node).toString();
+    }
+
+    public override function stringToNode(str:String) : Node {
+        return xmlToNode(Xml.parse(str).firstElement());
     }
 
     private function xmlToNode(xml:Xml) : Node {
         var n = new Node();
         n.name = xml.nodeName;
 
-        for (a in xml.attributes) {
+        for (a in xml.attributes()) {
             n.attributes.set(a, xml.get(a));
         }
 
@@ -33,16 +36,16 @@ class XMLSerializer extends Serializer {
         return n;
     }
 
-    private function nodeToXml(node:Node, root:Xml) : Xml {
-        var el = root.createElement(node.name);
+    private function nodeToXml(node:Node) : Xml {
+        var el = Xml.createElement(node.name);
         for (a in node.attributes.keys()) {
             el.set(a, node.attributes.get(a));
         }
 
         for (c in node.collections.keys()) {
-            var xmlcol = root.createElement(c);
+            var xmlcol = Xml.createElement(c);
             for (v in node.collections.get(c)) {
-                xmlcol.addChild(nodeToXml(v, root));
+                xmlcol.addChild(nodeToXml(v));
             }
             el.addChild(xmlcol);
         }
