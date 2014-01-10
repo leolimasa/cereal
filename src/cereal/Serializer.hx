@@ -35,6 +35,11 @@ class Serializer {
         throw "stringToNode is abstract";
     }
 
+    public function convert(contents:String, serializer:Serializer) : String {
+        serializer.types = types;
+        return serializer.nodeToString(stringToNode(contents));
+    }
+
     // ..................................................................................
 
     /**
