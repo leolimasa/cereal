@@ -1,0 +1,10 @@
+{
+  "name": "cereal",
+  "url" : "https://github.com/submain/cereal",
+  "license": "MIT",
+  "tags": ["serialization", "xml"],
+  "description": "Serialization library to and from xml files",
+  "version": "0.0.1",
+  "releasenote": "Initial release",
+  "contributors": ["Leonardo Sá","Jason","Nicolas"],
+}
