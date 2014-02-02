@@ -29,10 +29,12 @@ class Serializer {
 
     public function nodeToString(node:Node) : String {
         throw "nodeToString is abstract";
+	return "";
     }
 
     public function stringToNode(str:String) : Node {
         throw "stringToNode is abstract";
+	return null;
     }
 
     public function convert(contents:String, serializer:Serializer) : String {

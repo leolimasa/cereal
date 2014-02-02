@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": ["serialization", "xml"],
   "description": "Serialization library to and from xml files",
-  "version": "0.0.1",
-  "releasenote": "Initial release",
-  "contributors": ["Leonardo Sá","Jason","Nicolas"],
+  "version": "0.0.2",
+  "releasenote": "Fixed small incompatibility with windows",
+  "contributors": ["leo"]
 }
