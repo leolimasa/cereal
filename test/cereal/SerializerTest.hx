@@ -21,6 +21,7 @@ class DummyClass {
     public var children:Array<DummyClass>;
     public var intNumber:Int = 0;
     public var floatNumber:Float = 0;
+    public var negativeFloat:Float = 0;
     public var dummyAttr:DummyClass = null;
     public var boolAttr:Bool = false;
 
@@ -53,6 +54,7 @@ class SerializerTest extends TestCase {
         child1.name = "dummy";
         child1.attributes.set("intNumber", "42");
         child1.attributes.set("floatNumber", "3.14");
+        child1.attributes.set("negativeFloat", "-3.14");
         child1.collections.set("someobjs", [regobj1]);
         child1.collections.set("dummyAttr", [dummy]);
 
@@ -78,6 +80,7 @@ class SerializerTest extends TestCase {
         assertEquals("someattr1", root.children[0].someObjs[0].attr);
         assertEquals(42, root.children[0].intNumber);
         assertEquals(3.14, root.children[0].floatNumber);
+        assertEquals(-3.14, root.children[0].negativeFloat);
         assertEquals(55.66, root.children[0].dummyAttr.floatNumber);
         assertEquals(true, root.boolAttr);
 
